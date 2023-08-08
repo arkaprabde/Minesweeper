@@ -1,0 +1,517 @@
+//In this program I have tried to make the classic Minesweeper Game (Without Graphics) In BlueJ.
+import java.util.*;
+import java.io.*;
+class Minesweeper
+{
+    Scanner cs=new Scanner(System.in);//global Scanner object to take input through keyboard in multiple methods(functions) 
+    int size,mine;
+    String board[][],playboard[][];//board and playboard are two matrices.....one is hidden and one is displayed on screen
+    BufferedReader br=new BufferedReader(new InputStreamReader(System.in));
+    //global BufferedReader object to take input through keyboard in multiple functions*/
+    public static void main()
+    {   //driver method
+        Minesweeper ob=new Minesweeper();//creation of class object to call the non-static functions
+        ob.Begin();//this method is the starting method of the code
+    }//end of main
+
+    boolean FindFile()
+    {   //this file checks if a particular file is present in the system
+        boolean fl=false;
+        try
+        {
+            File ob=new File("M1.txt");//M1.txt holds the saved games in encrypted format
+            fl= ob.createNewFile();//this method checks if the file is present....if not it creates the file
+        }
+        catch(Exception e)
+        {
+        }
+        return fl;
+    }//end of FindFile
+
+    void Begin()
+    {   //this method asks the user if he wants to continue saved game(if any)
+        try
+        {
+            if(!FindFile())
+            {
+                Scanner s=new Scanner(new File("M1.txt"));//Scanner object to take input from file
+                if(s.hasNextLine())//checks if file has any content in it
+                {
+                    System.out.print("Continue Saved Game ?..........Yes / No..........");
+                    char a=' ';
+                    while(true)
+                    {   //takes input from user until the right input is given
+                        a=cs.nextLine().toLowerCase().charAt(0);
+                        if(a=='y' || a=='n')
+                            break;
+                        else
+                            System.out.print("Please Enter Correctly"); 
+                    }
+                    if(a=='y')
+                        InitializeByFile();//this method initializes the matrices by the content in file
+                    else
+                    {
+                        new FileWriter("M1.txt",false).close();//empties the file
+                        Initialize();//randomly initializes the matrices
+                    }
+                }
+                else
+                    Initialize();//fixes the size and number of mines
+            }
+            else
+                Initialize();//fixes the size and number of mines
+        }
+        catch(Exception e)
+        {
+        }
+    }//end of Begin
+
+    void DisplayMessage()
+    {   //this method displays the rules and meaning of symbols to the player
+        System.out.println("The 1st Row And First Column Display The Row And Column Numbers Respectively\nDisplay Meanings :-");
+        System.out.println("                    '-' Represents Unopened Cell");
+        System.out.println("                    '.' Represents Opened Empty Cell");
+        System.out.println("                    '"+(char)1769+"' Represents A Marked Cell");
+        System.out.println("                    '"+(char)1245+"' Represents Triggered Mine");
+        System.out.println("                    '"+(char)1758+"' Represents Mines\n");
+        System.out.println("For Opening First Cell Enter The Coordinates In 'x'<enter>'y' Format To Open The Cell (x,y)\n");
+        System.out.println("Their Are Three Types Of Commands.....Open , Mark And Quit");
+        System.out.println("For Moves...Enter Your Commands :-");
+        System.out.println("                                   \"o x y\" for Opening the cell (x,y)");
+        System.out.println("                                   \"m x y\" for Marking The Cell (x,y)");
+        System.out.println("                                   \"q\" for Saving And Exitting The Game. You can play the saved game again");
+    }//end of DisplayMessage
+
+    void Initialize()
+    {   //It fixes the size and number of mines
+        DisplayMessage();//displaying information about symbols and output
+        System.out.print("Enter Difficulty Level.........Easy / Medium / Hard / Custom......");
+        char a=' ';
+        while(true)
+        {   //takes input of level of difficulty
+            a=cs.nextLine().toLowerCase().charAt(0);
+            if(a=='e' || a=='m' || a=='h' || a=='c')
+                break;
+            else if(a=='q')
+            {
+                System.out.println("Game Terminated");
+                System.exit(0);
+            }
+            else
+                System.out.print("Please Enter Correctly"); 
+        }
+        if(a=='e')
+        {   
+            size=12;
+            mine=10;
+        }
+        else if(a=='m')
+        {
+            size=22;
+            mine=50;
+        }
+        else if(a=='h')
+        {
+            mine=99;
+            size=30;
+        }
+        else if(a=='c')
+        {   //custom mode
+            while(true)
+            {   //takes the custom size and number of mines input
+                try
+                {
+                    System.out.println("Enter Size (Min 5 , Max 35)");
+                    size=Integer.parseInt(br.readLine())+2;
+                    System.out.println("Enter Number Of Mines (Min 5 , Max "+((size-2)*(size-2)-9)+" )");
+                    mine=Integer.parseInt(br.readLine());
+                    if(size<7)
+                        size=7;
+                    else if(size>35)
+                        size=37;
+                    if(mine<5)
+                        mine=5;
+                    else if (mine>200)
+                        mine=200;
+                    if((size-2)*(size-2)-9<mine)
+                        System.out.print("Number Of Cells Less Than  Number Of Mines\nRe-");
+                    else
+                        break;
+                }
+                catch(Exception e)
+                {
+                    System.out.print("Wrong Input\nRe-");//prevents abnormal termination of program
+                }
+            }
+        }
+        playboard=new String[size][size];//creation of the matrices
+        board=new String[size][size];
+        Fill();//primarily fills both the matrices
+        MinePlant();//plants mines in Board matrix
+    }//end of Initialize
+
+    void Fill()
+    {   //primarily fills both the matrices
+        int i,j;
+        InitializeCorners();//initializes the corners of the matrices
+        for(i=1;i<size-1;i++)
+        {
+            for(j=1;j<size-1;j++)
+            {
+                playboard[i][j]="-";
+                board[i][j]=".";
+            }
+        }
+    }//end of FillMatrix
+
+    void InitializeCorners()
+    {   //initializes the corners of the matrices
+        for(int i=0;i<size;i++)
+            for(int j=0;j<size;j++)
+                if(i==0 && j==0)
+                    playboard[i][j]=board[i][j]=" ";
+                else if(i==0 && j<size-1)
+                    playboard[i][j]=board[i][j]=""+j;
+                else if(j==0 && i<size-1)
+                    playboard[i][j]=board[i][j]=""+i;
+                else if(i==size-1 || j==size-1)
+                    playboard[i][j]=board[i][j]=" ";
+    }//end of InitializeCorners
+
+    void InitializeByFile()
+    {   //initializes the marices with content of file
+        try
+        {
+            Scanner s=new Scanner(new File("M1.txt"));
+            size=s.nextInt();
+            mine=s.nextInt();
+            System.out.println(size+" "+mine);
+            board=new String[size][size];
+            playboard=new String[size][size];
+            int i,j;
+            for(i=0;i<size;i++)
+                for(j=0;j<size;j++)
+                    board[i][j]=""+(char)(s.next().charAt(0)-9);
+            for(i=0;i<size;i++)
+                for(j=0;j<size;j++)
+                    playboard[i][j]=""+(char)(s.next().charAt(0)-9);
+            InitializeCorners();//initializes the corners of the matrices
+            s.close();//destroys the object
+            Play();//the real play happens here
+        }
+        catch(Exception e)
+        {
+        }
+    }//end of InitializeByFile
+
+    void MinePlant()
+    {   //plants mines in the Board matrix
+        int i=0,x=0,y=0,x1=0,y1=0;
+        Display(playboard);//displays the playboard(which is still blank)
+        System.out.println("Enter Cell To Open In x <enter> y <enter> Format");
+        x=GetPosition();//gets the row number of the 1st move
+        y=GetPosition();//gets the column number of the 1st move
+        while(i<mine)
+        {   //plants mines
+            x1=(int)(Math.random()*size);//random row number to place mines
+            y1=(int)(Math.random()*size);//random column number to place mines
+            if(board[x1][y1].equals("."))//checking if cell is already filled
+            {
+                int flag=0;
+                /*the following loops check if the mine position is around the cell to open
+                (because the cells around the 1st opened cell must not contain mines)*/
+                for(int p=x-1;p<=x+1;p++)
+                    for(int q=y-1;q<=y+1;q++)
+                        if(x1==p && y1==q)
+                            flag=1;
+                if(flag==0)
+                {   //checking if all conditions are met to place the mine
+                    board[x1][y1]="*";
+                    i++;
+                }
+            }
+        }
+        NumberPlant();//plants numbers in the Board matrix
+        Open(x,y);//opens the chain of cells containg numbers or blanks around the cell (x,y)
+        Play();//the real play happens here
+    }//end of MinePlant
+
+    int GetPosition()
+    {   //inputs the row or column number of cell to open in 1st move
+        while(true)
+        {   //tells player continuously to give input until the right input is given
+            String s=cs.nextLine().trim().toLowerCase();
+            try
+            {
+                int n=Integer.valueOf(s);
+                if(n<size-1 && n>0)
+                    return n;//returns the row or column number inputted if it is correctly inputted
+                else
+                    System.out.println("Re-Enter Position....");
+            }
+            catch(Exception e)
+            {   //prevents abnormal termination of program due to input mismatches
+                if(s.charAt(0)=='q')
+                {   //if player wants to end ythe game
+                    System.out.println("Game Terminated");
+                    System.exit(0);//terminating program
+                }
+                System.out.println("Re-Enter Position....");
+            }
+        }
+    }//end of GetPosition
+
+    void NumberPlant()
+    {   //plants numbers around the mines in Board matrix
+        int i,j;
+        for(i=1;i<size-1;i++)
+        {
+            for(j=1;j<size-1;j++)
+            {
+                if(board[i][j].equals("."))
+                {
+                    int s=0;
+                    for(int k=i-1;k<=i+1;k++)
+                        for(int l=j-1;l<=j+1;l++)
+                            if(k>0 && l>0 && k<size-1 && l<size-1)
+                                if(board[k][l].equals("*"))
+                                    s++;
+                    if(s>0)
+                        board[i][j]=""+s;
+                }
+            }
+        }
+    }//end of NumberPlant
+
+    void Open(int i,int j)
+    {   //recursive function to store all the chain cells of Board (around (i,j) not containg mines) in Playboard so that they can be displayed
+        if(i>0 && j>0 && i<size-1 && j<size-1 && playboard[i][j]=="-")
+        {
+            playboard[i][j]=board[i][j];
+            if(Character.isDigit(board[i][j].charAt(0))==true)
+                return;
+            else
+            {   //all recursive calls
+                Open(i+1,j);
+                Open(i,j+1);
+                Open(i-1,j);
+                Open(i,j-1);
+                Open(i+1,j+1);
+                Open(i+1,j-1);
+                Open(i-1,j+1);
+                Open(i-1,j-1);
+            }
+        }
+        else
+            return;
+    }//end of Open
+
+    class Moves
+    {   //class which inputs the next move of the player
+        int x,y;//stores the cell position
+        char command;//stores what to do with the cell (x,y)
+        void GetMove()
+        {   //inputs the next move of player
+            while(true)
+            {   //tells the player to continuously enter moves until the input is correct
+                try
+                {
+                    System.out.println("Enter Your Move In <First Letter Of Command> <Space> x <Space> y <Enter> Format Unless You Are Quitting");
+                    String a=cs.nextLine();
+                    if(CheckMove(a))//checks if the input is valid
+                        break;
+                    else
+                        System.out.print("Re-");
+                }
+                catch(Exception e)
+                {   //prevents abnormal termination of program due to input mismatches
+                    System.out.print("Re-");
+                }
+            }
+        }//end of GetMove
+
+        boolean CheckMove(String a)
+        {   //checks if the input is valid
+            StringTokenizer s=new StringTokenizer(a," ");//creating a StringTokenizer object of a witrh delimitor " "
+            char b=s.nextToken().charAt(0);//1st character is the command
+            if(b=='o'||b=='m')
+            {
+                int t=Integer.parseInt(s.nextToken()),u=Integer.parseInt(s.nextToken());//the other two numbers represent the position of the cell
+                if(t>0 && u>0 && t<size-1 && u<size-1)//checking if cell(t,u) is valid
+                {
+                    if(playboard[t][u].equals("-") || playboard[t][u].equals("+"))
+                    {
+                        //all conditions met
+                        this.command=b;
+                        this.x=t;
+                        this.y=u;
+                        return true;
+                    }
+
+                    else
+                        return false;
+                }
+                else
+                    return false;
+            }
+            else if(b=='q')//tells to quit the game
+            {
+                this.command='q';
+                return true;
+            }
+            else
+                return false;
+        }//end of CheckMove
+    }//end of class Moves
+
+    void Play()
+    {   //the real play happens here
+        while(true)
+        {   //infinite loop
+            if (IsGameOver())//checks if all cells except those having mines have been opened
+            {
+                Display(board);//displaying the whole matrix including the mines
+                System.out.println("You Have Won");
+                try
+                {
+                    new FileWriter("M1.txt",false).close();//empties the content of this file
+                }
+                catch(Exception e)
+                {
+                }
+                PlayAgain();//asks the player if he wants to play again
+                System.exit(0);//terminates program
+            }
+            Moves move=new Moves();//object of Moves class to access its methods
+            Display(playboard);//displays the current status of the game
+            move.GetMove();//gets the next move of the player
+            char b=move.command;
+            int x=move.x,y=move.y;
+            if(b=='o')
+            {   //tells to open the cell (x,y)
+                if(playboard[x][y].equals("+"))//checks if cell (x,y) is marked
+                {
+                    System.out.print("Open Marked Cell ?.....Yes/No");
+                    char ch=cs.nextLine().toLowerCase().charAt(0);//asks player if he wants to open the marked cell
+                    if(ch=='y')
+                        playboard[x][y]=board[x][y];
+                }
+                if(board[x][y].equals("*"))//checking if opened cell contains mine
+                {
+                    playboard[x][y]="#";
+                    GameOver();//displays 'lost' message ends the game after doing some tasks
+                }
+                else if(board[x][y].equals("."))
+                    Open(x,y);//stores all the chain cells of Board (around (x,y) not containg mines) in Playboard so that they can be displayed
+                else
+                    playboard[x][y]=board[x][y];
+            }
+            else if(b=='m')
+                playboard[x][y]="+";//marks cell (x,y)
+            else
+            {
+                SaveGame();//saves the matrices in file so that the game can be continued
+                System.out.println("Your Game Has Been Saved");
+                System.exit(0);//terminates program
+            }
+        }
+    }//end of Play
+
+    boolean IsGameOver()
+    {   //checks if the player has solved the game
+        int i,j;
+        for(i=0;i<size;i++)
+            for(j=0;j<size;j++)
+                if((playboard[i][j].equals("-")||playboard[i][j].equals("+"))&&(!board[i][j].equals("*")))
+                    return false;//if any non-opened cell does not contain mine then the game must continue
+        return true;
+    }//end of IsGameOver
+
+    void GameOver()
+    {   //ends game when the player has lost
+        int i,j;
+        for(i=1;i<size-1;i++)
+            for(j=1;j<size-1;j++)
+                if(board[i][j].equals("*") && !playboard[i][j].equals("+") && !playboard[i][j].equals("#"))
+                    playboard[i][j]=board[i][j];//stores all mines in playboard matrix
+        Display(playboard);//displays playboard matrix
+        System.out.println("You Lost");
+        try
+        {
+            new FileWriter("M1.txt",false).close();//empties the file contents
+        }
+        catch(Exception e)
+        {
+        }
+        PlayAgain();//sees if player wants to play again
+        System.exit(0);//terminates program
+    }//end of GameOver
+
+    void SaveGame()
+    {   //saves current status of the matrices in the file for continuing the game in future
+        try
+        {
+            PrintWriter fout=new PrintWriter(new BufferedWriter(new FileWriter("M1.txt")));//opening file in witing mode
+            fout.print(size+" "+mine+" ");//storing size and number of mines in file
+            for(int i=0;i<size;i++)
+                for(int j=0;j<size;j++)
+                    fout.print((char)(board[i][j].charAt(0)+9)+" ");//storing the content of board matrix in encrypted form
+            for(int i=0;i<size;i++)
+                for(int j=0;j<size;j++)
+                    fout.print((char)(playboard[i][j].charAt(0)+9)+" ");//storing the content of playboard matrix in encrypted form
+            fout.close();//destroys the object
+        }
+        catch(Exception e)
+        {   //prevents abnormal termination of program
+            System.out.println("Oops Cant Save.....An Unknown Error Occured....\n"+e);//displays the error
+        }
+    }//end of SaveGame
+
+    void PlayAgain()
+    {   //asks player if he wants to play again
+        char ch=' ';
+        System.out.println("Want To Play Again ? Enter Yes/No....");
+        while(true)
+        {   //loop continuously takes input until correvt inout is given
+            ch=cs.nextLine().toLowerCase().charAt(0);
+            if(ch=='y'||ch=='n')
+                break;
+            else
+                System.out.print("Re-Enter Choice....");
+        }
+        if(ch=='y')
+        {
+            System.out.println("\u000C");//clears screen
+            System.gc();//destroys all pointerless objects
+            Minesweeper ob=new Minesweeper();//new object creation
+            ob.Initialize();//calling the method for starting the program all over again
+        }
+        else
+            System.exit(0);//terminates program
+    }//end of PlayAgain
+
+    void Display(String a[][])
+    {   //displays the matrix a
+        System.out.print("\u000C");//clears screen
+        for(int i=0;i<size;i++,System.out.println())
+        {
+            if(i==1)
+                System.out.println();
+            for(int j=0;j<size;j++)
+            {
+                if(j==1)
+                    System.out.print("   ");
+                if(a[i][j].equals("*"))
+                    System.out.print(" "+(char)1758+" ");
+                else if(a[i][j].equals("#"))
+                    System.out.print(" "+(char)1245+" ");
+                else if(a[i][j].equals("+"))
+                    System.out.print(" "+(char)1769+" ");
+                else if(a[i][j].length()==2)
+                    System.out.print(" "+a[i][j]);
+                else
+                    System.out.print(" "+a[i][j]+" ");
+            }
+        }
+    }//end of PlayAgin
+}//end of class Minesweeper
