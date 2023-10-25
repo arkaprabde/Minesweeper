@@ -43,12 +43,18 @@ class Minesweeper
                     {   //takes input from user until the right input is given
                         a=cs.nextLine().toLowerCase().charAt(0);
                         if(a=='y' || a=='n')
+                        {
                             break;
+                        }
                         else
-                            System.out.print("Please Enter Correctly"); 
+                        {
+                            System.out.print("Please Enter Correctly");
+                        }
                     }
                     if(a=='y')
+                    {
                         InitializeByFile();//this method initializes the matrices by the content in file
+                    }
                     else
                     {
                         new FileWriter("M1.txt",false).close();//empties the file
@@ -56,10 +62,14 @@ class Minesweeper
                     }
                 }
                 else
+                {
                     Initialize();//fixes the size and number of mines
+                }
             }
             else
+            {
                 Initialize();//fixes the size and number of mines
+            }
         }
         catch(Exception e)
         {
@@ -91,14 +101,18 @@ class Minesweeper
         {   //takes input of level of difficulty
             a=cs.nextLine().toLowerCase().charAt(0);
             if(a=='e' || a=='m' || a=='h' || a=='c')
+            {
                 break;
+            }
             else if(a=='q')
             {
                 System.out.println("Game Terminated");
                 System.exit(0);
             }
             else
-                System.out.print("Please Enter Correctly"); 
+            {
+                System.out.print("Please Enter Correctly");
+            }
         }
         if(a=='e')
         {   
@@ -126,17 +140,29 @@ class Minesweeper
                     System.out.println("Enter Number Of Mines (Min 5 , Max "+((size-2)*(size-2)-9)+" )");
                     mine=Integer.parseInt(br.readLine());
                     if(size<7)
+                    {
                         size=7;
+                    }
                     else if(size>35)
+                    {
                         size=37;
+                    }
                     if(mine<5)
+                    {
                         mine=5;
+                    }
                     else if (mine>200)
+                    {
                         mine=200;
+                    }
                     if((size-2)*(size-2)-9<mine)
+                    {
                         System.out.print("Number Of Cells Less Than  Number Of Mines\nRe-");
+                    }
                     else
+                    {
                         break;
+                    }
                 }
                 catch(Exception e)
                 {
@@ -167,15 +193,27 @@ class Minesweeper
     void InitializeCorners()
     {   //initializes the corners of the matrices
         for(int i=0;i<size;i++)
+        {
             for(int j=0;j<size;j++)
+            {
                 if(i==0 && j==0)
+                {
                     playboard[i][j]=board[i][j]=" ";
+                }
                 else if(i==0 && j<size-1)
+                {
                     playboard[i][j]=board[i][j]=""+j;
+                }
                 else if(j==0 && i<size-1)
+                {
                     playboard[i][j]=board[i][j]=""+i;
+                }
                 else if(i==size-1 || j==size-1)
+                {
                     playboard[i][j]=board[i][j]=" ";
+                }
+            }
+        }
     }//end of InitializeCorners
 
     void InitializeByFile()
@@ -190,11 +228,19 @@ class Minesweeper
             playboard=new String[size][size];
             int i,j;
             for(i=0;i<size;i++)
+            {
                 for(j=0;j<size;j++)
+                {
                     board[i][j]=""+(char)(s.next().charAt(0)-9);
+                }
+            }
             for(i=0;i<size;i++)
+            {
                 for(j=0;j<size;j++)
+                {
                     playboard[i][j]=""+(char)(s.next().charAt(0)-9);
+                }
+            }
             InitializeCorners();//initializes the corners of the matrices
             s.close();//destroys the object
             Play();//the real play happens here
@@ -221,9 +267,15 @@ class Minesweeper
                 /*the following loops check if the mine position is around the cell to open
                 (because the cells around the 1st opened cell must not contain mines)*/
                 for(int p=x-1;p<=x+1;p++)
+                {
                     for(int q=y-1;q<=y+1;q++)
+                    {
                         if(x1==p && y1==q)
+                        {
                             flag=1;
+                        }
+                    }
+                }
                 if(flag==0)
                 {   //checking if all conditions are met to place the mine
                     board[x1][y1]="*";
@@ -245,9 +297,13 @@ class Minesweeper
             {
                 int n=Integer.valueOf(s);
                 if(n<size-1 && n>0)
+                {
                     return n;//returns the row or column number inputted if it is correctly inputted
+                }
                 else
+                {
                     System.out.println("Re-Enter Position....");
+                }
             }
             catch(Exception e)
             {   //prevents abnormal termination of program due to input mismatches
@@ -272,12 +328,22 @@ class Minesweeper
                 {
                     int s=0;
                     for(int k=i-1;k<=i+1;k++)
+                    {
                         for(int l=j-1;l<=j+1;l++)
+                        {
                             if(k>0 && l>0 && k<size-1 && l<size-1)
+                            {
                                 if(board[k][l].equals("*"))
+                                {
                                     s++;
+                                }
+                            }
+                        }
+                    }
                     if(s>0)
+                    {
                         board[i][j]=""+s;
+                    }
                 }
             }
         }
@@ -289,7 +355,9 @@ class Minesweeper
         {
             playboard[i][j]=board[i][j];
             if(Character.isDigit(board[i][j].charAt(0))==true)
+            {
                 return;
+            }
             else
             {   //all recursive calls
                 Open(i+1,j);
@@ -303,7 +371,9 @@ class Minesweeper
             }
         }
         else
+        {
             return;
+        }
     }//end of Open
 
     class Moves
@@ -319,9 +389,13 @@ class Minesweeper
                     System.out.println("Enter Your Move In <First Letter Of Command> <Space> x <Space> y <Enter> Format Unless You Are Quitting");
                     String a=cs.nextLine();
                     if(CheckMove(a))//checks if the input is valid
+                    {
                         break;
+                    }
                     else
+                    {
                         System.out.print("Re-");
+                    }
                 }
                 catch(Exception e)
                 {   //prevents abnormal termination of program due to input mismatches
@@ -349,10 +423,14 @@ class Minesweeper
                     }
 
                     else
+                    {
                         return false;
+                    }
                 }
                 else
+                {
                     return false;
+                }
             }
             else if(b=='q')//tells to quit the game
             {
@@ -360,7 +438,9 @@ class Minesweeper
                 return true;
             }
             else
+            {
                 return false;
+            }
         }//end of CheckMove
     }//end of class Moves
 
@@ -394,7 +474,9 @@ class Minesweeper
                     System.out.print("Open Marked Cell ?.....Yes/No");
                     char ch=cs.nextLine().toLowerCase().charAt(0);//asks player if he wants to open the marked cell
                     if(ch=='y')
+                    {
                         playboard[x][y]=board[x][y];
+                    }
                 }
                 if(board[x][y].equals("*"))//checking if opened cell contains mine
                 {
@@ -402,12 +484,18 @@ class Minesweeper
                     GameOver();//displays 'lost' message ends the game after doing some tasks
                 }
                 else if(board[x][y].equals("."))
+                {
                     Open(x,y);//stores all the chain cells of Board (around (x,y) not containg mines) in Playboard so that they can be displayed
+                }
                 else
+                {
                     playboard[x][y]=board[x][y];
+                }
             }
             else if(b=='m')
+            {
                 playboard[x][y]="+";//marks cell (x,y)
+            }
             else
             {
                 SaveGame();//saves the matrices in file so that the game can be continued
@@ -421,9 +509,15 @@ class Minesweeper
     {   //checks if the player has solved the game
         int i,j;
         for(i=0;i<size;i++)
+        {
             for(j=0;j<size;j++)
+            {
                 if((playboard[i][j].equals("-")||playboard[i][j].equals("+"))&&(!board[i][j].equals("*")))
+                {
                     return false;//if any non-opened cell does not contain mine then the game must continue
+                }
+            }
+        }
         return true;
     }//end of IsGameOver
 
@@ -431,9 +525,15 @@ class Minesweeper
     {   //ends game when the player has lost
         int i,j;
         for(i=1;i<size-1;i++)
+        {
             for(j=1;j<size-1;j++)
+            {
                 if(board[i][j].equals("*") && !playboard[i][j].equals("+") && !playboard[i][j].equals("#"))
+                {
                     playboard[i][j]=board[i][j];//stores all mines in playboard matrix
+                }
+            }
+        }
         Display(playboard);//displays playboard matrix
         System.out.println("You Lost");
         try
@@ -454,11 +554,19 @@ class Minesweeper
             PrintWriter fout=new PrintWriter(new BufferedWriter(new FileWriter("M1.txt")));//opening file in witing mode
             fout.print(size+" "+mine+" ");//storing size and number of mines in file
             for(int i=0;i<size;i++)
+            {
                 for(int j=0;j<size;j++)
+                {
                     fout.print((char)(board[i][j].charAt(0)+9)+" ");//storing the content of board matrix in encrypted form
+                }
+            }
             for(int i=0;i<size;i++)
+            {
                 for(int j=0;j<size;j++)
+                {
                     fout.print((char)(playboard[i][j].charAt(0)+9)+" ");//storing the content of playboard matrix in encrypted form
+                }
+            }
             fout.close();//destroys the object
         }
         catch(Exception e)
@@ -475,9 +583,13 @@ class Minesweeper
         {   //loop continuously takes input until correvt inout is given
             ch=cs.nextLine().toLowerCase().charAt(0);
             if(ch=='y'||ch=='n')
+            {
                 break;
+            }
             else
+            {
                 System.out.print("Re-Enter Choice....");
+            }
         }
         if(ch=='y')
         {
@@ -487,7 +599,9 @@ class Minesweeper
             ob.Initialize();//calling the method for starting the program all over again
         }
         else
+        {
             System.exit(0);//terminates program
+        }
     }//end of PlayAgain
 
     void Display(String a[][])
@@ -496,21 +610,35 @@ class Minesweeper
         for(int i=0;i<size;i++,System.out.println())
         {
             if(i==1)
+            {
                 System.out.println();
+            }
             for(int j=0;j<size;j++)
             {
                 if(j==1)
+                {
                     System.out.print("   ");
+                }
                 if(a[i][j].equals("*"))
+                {
                     System.out.print(" "+(char)1758+" ");
+                }
                 else if(a[i][j].equals("#"))
+                {
                     System.out.print(" "+(char)1245+" ");
+                }
                 else if(a[i][j].equals("+"))
+                {
                     System.out.print(" "+(char)1769+" ");
+                }
                 else if(a[i][j].length()==2)
+                {
                     System.out.print(" "+a[i][j]);
+                }
                 else
+                {
                     System.out.print(" "+a[i][j]+" ");
+                }
             }
         }
     }//end of PlayAgin
