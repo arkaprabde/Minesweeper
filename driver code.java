@@ -8,7 +8,7 @@ class Minesweeper
     String board[][],playboard[][];//board and playboard are two matrices.....one is hidden and one is displayed on screen
     BufferedReader br=new BufferedReader(new InputStreamReader(System.in));
     //global BufferedReader object to take input through keyboard in multiple functions*/
-    public static void main()
+    public static void main(String args[])
     {   //driver method
         Minesweeper ob=new Minesweeper();//creation of class object to call the non-static functions
         ob.Begin();//this method is the starting method of the code
@@ -483,13 +483,9 @@ class Minesweeper
                     playboard[x][y]="#";
                     GameOver();//displays 'lost' message ends the game after doing some tasks
                 }
-                else if(board[x][y].equals("."))
-                {
-                    Open(x,y);//stores all the chain cells of Board (around (x,y) not containg mines) in Playboard so that they can be displayed
-                }
                 else
                 {
-                    playboard[x][y]=board[x][y];
+                    Open(x,y);//stores all the chain cells of Board (around (x,y) not containg mines) in Playboard so that they can be displayed
                 }
             }
             else if(b=='m')
@@ -615,30 +611,14 @@ class Minesweeper
             }
             for(int j=0;j<size;j++)
             {
-                if(j==1)
-                {
-                    System.out.print("   ");
-                }
-                if(a[i][j].equals("*"))
-                {
-                    System.out.print(" "+(char)1758+" ");
-                }
-                else if(a[i][j].equals("#"))
-                {
-                    System.out.print(" "+(char)1245+" ");
-                }
-                else if(a[i][j].equals("+"))
-                {
-                    System.out.print(" "+(char)1769+" ");
-                }
-                else if(a[i][j].length()==2)
+				if(a[i][j].length()==2)
                 {
                     System.out.print(" "+a[i][j]);
                 }
                 else
                 {
                     System.out.print(" "+a[i][j]+" ");
-                }
+				}
             }
         }
     }//end of PlayAgin
