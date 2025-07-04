@@ -611,7 +611,7 @@ class Minesweeper
             }
             for(int j=0;j<size;j++)
             {
-				if(a[i][j].length()==2)
+		if(a[i][j].length()==2)
                 {
                     System.out.print(" "+a[i][j]);
                 }
